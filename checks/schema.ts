@@ -17,7 +17,9 @@ function guessPageType(url: string): string {
   const path = new URL(url).pathname.toLowerCase();
   if (path === "/" || path === "") return "home";
   if (/about/i.test(path)) return "about";
-  if (/service/i.test(path)) return "services";
+  // Nonprofits and agencies commonly publish their offerings under
+  // /programs/ rather than /services/ — same page type, same expectations.
+  if (/service|program/i.test(path)) return "services";
   if (/product/i.test(path)) return "products";
   if (/blog\/?$/i.test(path)) return "blog";
   if (/blog\/.+|post\/.+|article/i.test(path)) return "post";
@@ -94,6 +96,18 @@ export function checkSchema(pages: PageData[]): DimensionResult {
         findings.push(f);
         pageFindings.push(f);
       }
+    } else if (types.includes("WebPage") && types.includes("BreadcrumbList")) {
+      // Pages the path heuristic cannot classify were hard-capped at 70 even
+      // with correct markup. A page-level WebPage node plus breadcrumbs is the
+      // right generic structure, so award the same credit typed pages get.
+      pageScore += 20;
+      const f: Finding = {
+        type: "pass",
+        message: `Has page-level schema: ${types.join(", ")}`,
+        page: page.path,
+      };
+      findings.push(f);
+      pageFindings.push(f);
     }
 
     if (pageType !== "home" && !types.includes("BreadcrumbList")) {
