@@ -55,7 +55,9 @@ export function checkRendering(pages: PageData[]): DimensionResult {
       pageScore = Math.min(pageScore, 20);
     }
 
-    const hasSSR = /data-reactroot|__NEXT_DATA__|__NUXT|astro/i.test(
+    // __NEXT_DATA__ is the Pages Router marker; the App Router (Next 13+)
+    // streams RSC payloads via self.__next_f instead. Both are pre-rendered.
+    const hasSSR = /data-reactroot|__NEXT_DATA__|__next_f|__NUXT|astro/i.test(
       page.html,
     );
     if (hasSSR) {

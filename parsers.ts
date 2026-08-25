@@ -104,7 +104,14 @@ export function extractInternalLinks(
           path = path.slice(0, -1);
         }
         resolved.pathname = path;
-        links.add(resolved.href);
+        // Root links resolve to "origin/" while the crawl seed is stored
+        // without the trailing slash — normalize so the homepage is not
+        // crawled (and scored) twice under two spellings of the same URL.
+        links.add(
+          resolved.pathname === "/" && !resolved.search
+            ? resolved.origin
+            : resolved.href,
+        );
       }
     } catch {
       // Skip invalid URLs
