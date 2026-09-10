@@ -37,7 +37,7 @@ export const AI_CRAWLERS = [
  * Surfaced in the report UI so users (and we) can tell which methodology a
  * historical scan used.
  */
-export const ENGINE_VERSION = "2.4.0-google-microsoft-aligned-psi";
+export const ENGINE_VERSION = "2.4.1-crawl-safety";
 
 /**
  * Dimension weights — Phase 3, final target (May 2026).
@@ -51,12 +51,9 @@ export const ENGINE_VERSION = "2.4.0-google-microsoft-aligned-psi";
  *     indexability, helpful content, semantic HTML, server-rendered main content,
  *     page experience, real internal linking, and original substance.
  *
- * Eleven scored dimensions. Each maps to a citable line in Google Search
- * Essentials or the AI Optimization Guide. Top tier (15%) goes to the two
- * make-or-break categories: helpful content and indexability. Mid tier (10%)
- * covers the per-page technical signals. Lower tiers reflect Google's own
- * "helpful but not required" positioning (schema, sitemap) and supplementary
- * site-architecture checks.
+ * Eleven scored dimensions with project-defined weights and thresholds.
+ * Source links provide background guidance, not official Google or Microsoft
+ * weights, certification, or a measurement of citation probability.
  *
  * Source: https://developers.google.com/search/docs/essentials
  */

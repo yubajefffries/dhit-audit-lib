@@ -90,3 +90,15 @@ npx tsc --noEmit
 - [Microsoft AI Performance Dashboard (Mar 2026)](https://about.ads.microsoft.com/en/blog/post/march-2026/the-ai-performance-dashboard-your-view-into-where-your-brand-appears-across-the-ai-web)
 - [PageSpeed Insights API](https://developers.google.com/speed/docs/insights/v5/get-started)
 - [IndexNow protocol](https://www.indexnow.org/)
+
+## 2.4.1 crawl safety patch
+
+- Resolve all DNS answers before each request and redirect. Reject mixed public/private answers, unresolved hosts, non-HTTP(S) URLs, credentials, private/link-local/metadata destinations, and special-use IP ranges. Pin the socket lookup to a validated address while preserving Host and TLS certificate verification. Redirects are manual and limited to five.
+- HTML responses are limited to 2 MiB; root text assets to 1 MiB. Limits apply to streamed bytes as well as Content-Length. Request deadlines (15 seconds for pages, 10 seconds for assets) cover DNS, redirects, headers and body reads. Requests use identity encoding and reject compressed responses, avoiding decompression expansion.
+- HTTP-error page records, including empty/non-HTML error responses, are retained so indexability can report their status. Network failures, unsupported successful content types, and rejected/oversized responses remain excluded; this is a bounded sample, not a complete site inventory.
+- Includes the previously unversioned root-link normalization, Next App Router marker, and schema recognition changes already on main. Weights remain project-defined, not official Google/Microsoft weights.
+
+Offline regression tests: with Node 20+ and `tsx`/`cheerio` installed, run `tsx --test tests/*.test.ts`. No external requests, DNS, or model calls are made by these fixtures.
+
+- Lite now preserves unique per-page findings with page references in each dimension's findings list, while still omitting page grouping/scores and all deep-only work. Existing aggregate summaries may still omit explanations for some deductions.
+- AI surface coverage now reports only two limited crawler-rule observations, with unavailable robots data marked unknown. It no longer infers product visibility, citation eligibility, or unsupported index partnerships. No score weights changed.

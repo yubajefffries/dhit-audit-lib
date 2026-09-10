@@ -2,6 +2,7 @@ import type {
   AuditResult,
   CrawlResult,
   DimensionResult,
+  Finding,
   PageAuditSummary,
   PerPageScore,
 } from "./types";
@@ -133,7 +134,20 @@ function composePageScores(
 function stripPerPage(dimensions: DimensionResult[]): DimensionResult[] {
   return dimensions.map((d) => {
     if (!d.pages) return d;
-    const copy: DimensionResult = { ...d };
+    // Lite omits page grouping, but must retain the diagnostic evidence.
+    const findings = [...d.findings];
+    const key = (f: Finding) => JSON.stringify([f.type, f.message, f.detail ?? "", f.page ?? ""]);
+    const seen = new Set(findings.map(key));
+    for (const page of d.pages) {
+      for (const finding of page.findings) {
+        const evidence = { ...finding, page: finding.page ?? page.url };
+        if (!seen.has(key(evidence))) {
+          findings.push(evidence);
+          seen.add(key(evidence));
+        }
+      }
+    }
+    const copy: DimensionResult = { ...d, findings };
     delete copy.pages;
     return copy;
   });

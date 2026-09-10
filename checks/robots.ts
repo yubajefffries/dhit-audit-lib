@@ -157,7 +157,7 @@ export function checkRobots(robotsTxt: string | null): DimensionResult {
       type: "fail",
       message: "Bingbot is blocked from your site",
       detail:
-        "Bing's index powers Microsoft Copilot, ChatGPT search, Perplexity, Brave Search, DuckDuckGo, and You.com. Blocking Bingbot makes the site invisible to the entire non-Google AI ecosystem.",
+        "The simplified parser detected a root-wide Bingbot block. This may restrict Bing crawling, but does not establish indexing status or visibility across AI products.",
     });
     score = Math.min(score, 30);
   } else {

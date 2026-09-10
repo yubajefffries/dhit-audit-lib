@@ -13,6 +13,6 @@
     "allowImportingTsExtensions": false,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["*.ts", "checks/*.ts", "index.ts"],
+  "include": ["*.ts", "checks/*.ts", "tests/*.ts", "index.ts"],
   "exclude": ["node_modules"]
 }
