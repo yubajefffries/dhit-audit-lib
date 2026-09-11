@@ -1,8 +1,8 @@
 {
   "name": "dhit-audit-lib",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "private": true,
-  "description": "DarkHorse IT shared AI-search audit engine. Scored against Google Search Essentials, the Google AI Optimization Guide, and Microsoft Bing/AI Performance guidance.",
+  "description": "Shared deterministic technical audit engine with project-defined scoring and explicit diagnostic limits.",
   "type": "module",
   "main": "./index.ts",
   "types": "./index.ts",

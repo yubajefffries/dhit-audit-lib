@@ -1,86 +1,12 @@
 import type { DimensionResult, Finding } from "../types";
 import { AI_CRAWLERS, gradeFromScore } from "../constants";
 
-interface RobotsRule {
-  userAgent: string;
-  rules: { type: "allow" | "disallow"; path: string }[];
-}
-
-function parseRobotsTxt(content: string): RobotsRule[] {
-  const rules: RobotsRule[] = [];
-  let currentAgent: string | null = null;
-  let currentRules: { type: "allow" | "disallow"; path: string }[] = [];
-
-  for (const rawLine of content.split("\n")) {
-    const line = rawLine.trim();
-    if (line.startsWith("#") || line === "") continue;
-
-    const uaMatch = line.match(/^User-agent:\s*(.+)/i);
-    if (uaMatch) {
-      if (currentAgent !== null) {
-        rules.push({ userAgent: currentAgent, rules: currentRules });
-      }
-      currentAgent = uaMatch[1].trim();
-      currentRules = [];
-      continue;
-    }
-
-    const allowMatch = line.match(/^Allow:\s*(.*)/i);
-    if (allowMatch && currentAgent !== null) {
-      currentRules.push({ type: "allow", path: allowMatch[1].trim() });
-      continue;
-    }
-
-    const disallowMatch = line.match(/^Disallow:\s*(.*)/i);
-    if (disallowMatch && currentAgent !== null) {
-      const path = disallowMatch[1].trim();
-      if (path) {
-        currentRules.push({ type: "disallow", path });
-      }
-      continue;
-    }
-  }
-
-  if (currentAgent !== null) {
-    rules.push({ userAgent: currentAgent, rules: currentRules });
-  }
-
-  return rules;
-}
-
-function isCrawlerBlocked(
-  rules: RobotsRule[],
-  crawlerName: string,
-): boolean {
-  const specificRule = rules.find(
-    (r) => r.userAgent.toLowerCase() === crawlerName.toLowerCase(),
-  );
-  if (specificRule) {
-    const hasDisallowAll = specificRule.rules.some(
-      (r) => r.type === "disallow" && r.path === "/",
-    );
-    const hasAllowAll = specificRule.rules.some(
-      (r) => r.type === "allow" && r.path === "/",
-    );
-    if (hasDisallowAll && !hasAllowAll) return true;
-    if (hasAllowAll) return false;
-  }
-
-  const wildcardRule = rules.find((r) => r.userAgent === "*");
-  if (wildcardRule) {
-    const hasDisallowAll = wildcardRule.rules.some(
-      (r) => r.type === "disallow" && r.path === "/",
-    );
-    if (hasDisallowAll) return true;
-  }
-
-  return false;
-}
+import { parseRobotsTxt, isCrawlerBlocked } from "../robots-parser";
 
 /**
- * checkRobots — SCORED.
+ * checkRobots; SCORED.
  *
- * Per Google Search Essentials (Pillar A), the requirement is crawlability —
+ * Per Google Search Essentials (Pillar A), the requirement is crawlability ;
  * Googlebot must be able to reach indexable pages, and the sitemap should be
  * discoverable. We score on:
  *   - File presence
@@ -91,7 +17,7 @@ function isCrawlerBlocked(
  *
  * Source: https://developers.google.com/search/docs/essentials/technical
  */
-export function checkRobots(robotsTxt: string | null): DimensionResult {
+export function checkRobots(robotsTxt: string | null, paths: string[] = ["/"]): DimensionResult {
   const findings: Finding[] = [];
 
   if (!robotsTxt) {
@@ -102,7 +28,7 @@ export function checkRobots(robotsTxt: string | null): DimensionResult {
         "A robots.txt file is optional, but recommended. Add one at /robots.txt that references your sitemap and allows Googlebot.",
     });
     // A missing robots.txt means crawlers default to allowed, so this isn't
-    // a hard failure — just below ideal. Score 50.
+    // a hard failure; just below ideal. Score 50.
     return {
       id: "robots",
       name: "robots.txt",
@@ -131,40 +57,40 @@ export function checkRobots(robotsTxt: string | null): DimensionResult {
     });
   }
 
-  const googlebotBlocked = isCrawlerBlocked(rules, "Googlebot");
-  const bingbotBlocked = isCrawlerBlocked(rules, "Bingbot");
+  const googlebotBlocked = paths.some((path) => isCrawlerBlocked(rules, "Googlebot", path));
+  const bingbotBlocked = paths.some((path) => isCrawlerBlocked(rules, "Bingbot", path));
 
-  // Googlebot — gateway to Google Search, AI Overviews, AI Mode, Gemini grounded results
+  // Googlebot; gateway to Google Search, AI Overviews, AI Mode, Gemini grounded results
   if (googlebotBlocked) {
     findings.push({
       type: "fail",
-      message: "Googlebot is blocked from your site",
+      message: "Googlebot is blocked on one or more sampled paths",
       detail:
-        "This is the single biggest crawl-eligibility problem you can have. Without Googlebot access, the site cannot appear in Google Search, AI Overviews, AI Mode, or Gemini grounded results.",
+        "Matching robots rules restrict Googlebot on sampled paths. Check whether those restrictions are intentional. This does not establish indexing or citation status.",
     });
     score = Math.min(score, 15);
   } else {
     score += 15;
     findings.push({
       type: "pass",
-      message: "Googlebot is allowed (Google Search + AI Overviews + AI Mode + Gemini)",
+      message: "No Googlebot block found on sampled paths",
     });
   }
 
-  // Bingbot — gateway to Bing, Microsoft Copilot, ChatGPT search, Perplexity, Brave, DuckDuckGo, You.com
+  // Bingbot; gateway to Bing, Microsoft Copilot, ChatGPT search, Perplexity, Brave, DuckDuckGo, You.com
   if (bingbotBlocked) {
     findings.push({
       type: "fail",
-      message: "Bingbot is blocked from your site",
+      message: "Bingbot is blocked on one or more sampled paths",
       detail:
-        "Bing's index powers Microsoft Copilot, ChatGPT search, Perplexity, Brave Search, DuckDuckGo, and You.com. Blocking Bingbot makes the site invisible to the entire non-Google AI ecosystem.",
+        "Matching robots rules restrict Bingbot on sampled paths. Preserve intentional restrictions; this does not establish indexing or visibility across AI products.",
     });
     score = Math.min(score, 30);
   } else {
     score += 15;
     findings.push({
       type: "pass",
-      message: "Bingbot is allowed (Bing + Copilot + ChatGPT search + Perplexity + Brave + DuckDuckGo)",
+      message: "No Bingbot block found on sampled paths",
     });
   }
 
@@ -182,13 +108,13 @@ export function checkRobots(robotsTxt: string | null): DimensionResult {
 }
 
 /**
- * checkAiCrawlers — INFORMATIONAL ONLY (does not affect the score).
+ * checkAiCrawlers; INFORMATIONAL ONLY (does not affect the score).
  *
  * Surfaces whether the site explicitly allows or blocks third-party AI
  * crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.).
  *
  * This is NOT a Google AI search signal. Google's AI Overviews and AI Mode
- * use the regular Google index — Googlebot's access is what matters for
+ * use the regular Google index; Googlebot's access is what matters for
  * Google AI citation eligibility. The third-party crawler allow-list is
  * about training-data access for OpenAI / Anthropic / Perplexity / etc.
  *
@@ -203,20 +129,20 @@ export function checkAiCrawlers(robotsTxt: string | null): DimensionResult {
     message:
       "Third-party AI crawler access is not a Google AI search signal.",
     detail:
-      "Google's AI Overviews and AI Mode use the regular Google Search index — Googlebot's access is what matters for Google AI citation eligibility. The bots below (GPTBot, ClaudeBot, etc.) affect whether third-party AI products can use your content for training or in their own answers. This check is informational and does not affect your score.",
+      "Google's AI Overviews and AI Mode use the regular Google Search index; Googlebot's access is what matters for Google AI citation eligibility. The bots below (GPTBot, ClaudeBot, etc.) affect whether third-party AI products can use your content for training or in their own answers. This check is informational and does not affect your score.",
   });
 
   if (!robotsTxt) {
     findings.push({
       type: "info",
-      message: "No robots.txt — third-party AI crawlers default to allowed.",
+      message: "No robots.txt; third-party AI crawlers default to allowed.",
     });
     return {
       id: "aiCrawlers",
       name: "Third-Party AI Crawler Allow-List (Informational)",
       weight: 0,
       score: 0,
-      grade: "—",
+      grade: "Not scored",
       findings,
       fixable: false,
       informational: true,
@@ -251,21 +177,21 @@ export function checkAiCrawlers(robotsTxt: string | null): DimensionResult {
   if (allowedCrawlers.length > 0) {
     findings.push({
       type: "info",
-      message: `${allowedCrawlers.length} third-party AI crawlers explicitly allowed`,
+      message: `${allowedCrawlers.length} third-party AI crawlers with specific rules allowing the root path`,
       detail: allowedCrawlers.join(", "),
     });
   }
   if (blockedCrawlers.length > 0) {
     findings.push({
       type: "info",
-      message: `${blockedCrawlers.length} third-party AI crawlers explicitly blocked`,
+      message: `${blockedCrawlers.length} third-party AI crawlers blocked at the root path`,
       detail: blockedCrawlers.join(", "),
     });
   }
   if (unlistedCrawlers.length > 0) {
     findings.push({
       type: "info",
-      message: `${unlistedCrawlers.length} third-party AI crawlers not listed (default = allowed)`,
+      message: `${unlistedCrawlers.length} third-party AI crawlers without specific rules; root path allowed by fallback policy`,
       detail: unlistedCrawlers.join(", "),
     });
   }
@@ -275,7 +201,7 @@ export function checkAiCrawlers(robotsTxt: string | null): DimensionResult {
     name: "Third-Party AI Crawler Allow-List (Informational)",
     weight: 0,
     score: 0,
-    grade: "—",
+    grade: "Not scored",
     findings,
     fixable: false,
     informational: true,

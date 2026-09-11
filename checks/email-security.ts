@@ -49,12 +49,12 @@ async function checkSpf(domain: string): Promise<SpfResult> {
   if (lower.includes("-all")) {
     mechanism = "-all";
     grade = "pass";
-    detail = "Hard fail, strict policy, unauthorized senders are rejected";
+    detail = "SPF -all observed: requests a hard-fail result for unmatched senders. Receiver handling and full SPF evaluation were not tested.";
   } else if (lower.includes("~all")) {
     mechanism = "~all";
     grade = "warning";
     detail =
-      "Soft fail, unauthorized senders are flagged but not rejected. Consider switching to -all";
+      "SPF ~all observed: requests a soft-fail result for unmatched senders. Receiver handling was not tested.";
   } else if (lower.includes("+all") || lower.includes("?all")) {
     mechanism = lower.includes("+all") ? "+all" : "?all";
     grade = "fail";
@@ -85,7 +85,7 @@ async function checkDmarc(domain: string): Promise<DmarcResult> {
       strict: false,
       grade: "fail",
       findings: [
-        "No DMARC record found, no policy to prevent email spoofing",
+        "No DMARC record observed. DNS lookup failures can resemble missing records; message handling was not tested.",
       ],
     };
   }
@@ -109,10 +109,10 @@ async function checkDmarc(domain: string): Promise<DmarcResult> {
   let grade: "pass" | "warning" | "fail" = "pass";
 
   if (policy === "reject") {
-    findings.push("Policy: reject, strictest enforcement");
+    findings.push("Policy: reject observed; requests rejection of DMARC failures. Receiver enforcement was not tested.");
   } else if (policy === "quarantine") {
     findings.push(
-      "Policy: quarantine, spoofed emails go to spam. Consider upgrading to reject",
+      "Policy: quarantine observed; requests quarantine for DMARC failures. Receiver enforcement was not tested.",
     );
     grade = "warning";
   } else {
@@ -127,7 +127,7 @@ async function checkDmarc(domain: string): Promise<DmarcResult> {
   } else if (subdomainPolicy === "quarantine") {
     findings.push("Subdomain policy: quarantine");
   } else if (!subdomainPolicy || subdomainPolicy === "none") {
-    findings.push("Subdomain policy: not set or none, subdomains unprotected");
+    findings.push("Subdomain policy: not set or none; an omitted sp policy inherits p. Receiver enforcement was not tested.");
     if (grade === "pass") grade = "warning";
   }
 

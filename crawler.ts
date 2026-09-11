@@ -3,88 +3,21 @@ import type { CrawlResult, PageData } from "./types";
 import { extractInternalLinks, detectSiteType } from "./parsers";
 import { MAX_PAGES_TO_DISCOVER } from "./constants";
 
-const BLOCKED_HOSTS = [
-  /^localhost$/i,
-  /^127\./,
-  /^10\./,
-  /^172\.(1[6-9]|2[0-9]|3[01])\./,
-  /^192\.168\./,
-  /^0\./,
-  /^169\.254\./,
-  /^\[::1\]$/,
-  /^\[fc/i,
-  /^\[fd/i,
-  /^\[fe80/i,
-];
+import { fetchBounded, MAX_HTML_BYTES, MAX_TEXT_BYTES } from "./safe-fetch";
 
-function isBlockedUrl(urlString: string): boolean {
+async function fetchPage(url: string): Promise<{ html: string; status: number } | null> {
   try {
-    const url = new URL(urlString);
-    return BLOCKED_HOSTS.some((pattern) => pattern.test(url.hostname));
-  } catch {
-    return true;
-  }
-}
-
-async function fetchPage(
-  url: string,
-): Promise<{ html: string; status: number } | null> {
-  if (isBlockedUrl(url)) return null;
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent":
-          "LLMSearch-Audit/1.0 (+https://yourupdatedpage.xyz)",
-        Accept:
-          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-      },
-      redirect: "follow",
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) return { html: "", status: response.status };
-
-    const contentType = response.headers.get("content-type") || "";
-    if (
-      !contentType.includes("text/html") &&
-      !contentType.includes("application/xhtml")
-    ) {
-      return null;
-    }
-
-    const html = await response.text();
-    return { html, status: response.status };
+    const result = await fetchBounded(url, { maxBytes: MAX_HTML_BYTES, timeoutMs: 15000, htmlOnly: true });
+    return { html: result.body, status: result.status };
   } catch {
     return null;
   }
 }
 
 async function fetchTextFile(url: string): Promise<string | null> {
-  if (isBlockedUrl(url)) return null;
-
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 10000);
-
-    const response = await fetch(url, {
-      signal: controller.signal,
-      headers: {
-        "User-Agent":
-          "LLMSearch-Audit/1.0 (+https://yourupdatedpage.xyz)",
-      },
-      redirect: "follow",
-    });
-
-    clearTimeout(timeout);
-
-    if (!response.ok) return null;
-    return await response.text();
+    const result = await fetchBounded(url, { maxBytes: MAX_TEXT_BYTES, timeoutMs: 10000 });
+    return result.status >= 200 && result.status < 300 ? result.body : null;
   } catch {
     return null;
   }
@@ -117,7 +50,7 @@ export async function crawlSite(
   const origin = parsedBase.origin;
 
   const rootResult = await fetchPage(baseUrl);
-  if (!rootResult || !rootResult.html) {
+  if (!rootResult || (!rootResult.html && rootResult.status < 400)) {
     throw new Error(`Could not fetch ${baseUrl}. Site may be unreachable.`);
   }
 
@@ -128,7 +61,7 @@ export async function crawlSite(
   const title = $("title").first().text().trim() || baseUrl;
   pages.push({
     url: baseUrl,
-    path: "/",
+    path: parsedBase.pathname,
     html: rootResult.html,
     title,
     statusCode: rootResult.status,
@@ -148,7 +81,7 @@ export async function crawlSite(
         if (visited.has(url)) return null;
         visited.add(url);
         const result = await fetchPage(url);
-        if (!result || !result.html) return null;
+        if (!result || (!result.html && result.status < 400)) return null;
 
         const $page = cheerio.load(result.html);
         const pageTitle = $page("title").first().text().trim() || url;

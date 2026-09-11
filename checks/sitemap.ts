@@ -1,3 +1,4 @@
+import * as cheerio from "cheerio";
 import type { DimensionResult, Finding, PageData } from "../types";
 import { gradeFromScore } from "../constants";
 
@@ -27,7 +28,7 @@ export function checkSitemap(
   const hasNamespace = sitemapXml.includes("sitemaps.org/schemas/sitemap");
   if (hasNamespace) {
     score += 15;
-    findings.push({ type: "pass", message: "Valid XML namespace" });
+    findings.push({ type: "pass", message: "Standard sitemap namespace marker present" });
   } else {
     findings.push({
       type: "warning",
@@ -35,10 +36,13 @@ export function checkSitemap(
     });
   }
 
-  const locMatches = sitemapXml.match(/<loc>([^<]+)<\/loc>/g) || [];
-  const sitemapUrls = locMatches.map((m) =>
-    m.replace(/<\/?loc>/g, "").trim(),
-  );
+  // XML mode extracts structure/entities but is tolerant, not a validator.
+  const $ = cheerio.load(sitemapXml, { xmlMode: true });
+  const isIndex = $("sitemapindex").length > 0;
+  const sitemapUrls = $(isIndex ? "sitemapindex > sitemap > loc" : "urlset > url > loc")
+    .map((_, el) => $(el).text().trim()).get();
+  findings.push({ type: "info", message: "Sitemap structure observations only", detail: "XML well-formedness, protocol validity, fetchability and date accuracy are not validated. Child sitemaps are not fetched." });
+  const normalize = (url: string) => { try { const u = new URL(url); u.hash = ""; return u.href; } catch { return ""; } };
 
   if (sitemapUrls.length === 0) {
     findings.push({ type: "fail", message: "No URLs found in sitemap" });
@@ -46,16 +50,16 @@ export function checkSitemap(
     score += 15;
     findings.push({
       type: "pass",
-      message: `${sitemapUrls.length} URLs in sitemap`,
+      message: `${sitemapUrls.length} ${isIndex ? "child sitemap references" : "page URLs"} in sitemap`,
     });
 
     const coveredPages = pages.filter((p) =>
       sitemapUrls.some(
-        (su) => su.includes(p.path) || p.url.includes(su) || su === p.url,
+        (su) => normalize(su) !== "" && normalize(su) === normalize(p.url),
       ),
     );
 
-    if (pages.length > 0) {
+    if (!isIndex && pages.length > 0) {
       const coverage = coveredPages.length / pages.length;
       if (coverage >= 0.8) {
         score += 15;
@@ -76,7 +80,7 @@ export function checkSitemap(
   const hasLastmod = /<lastmod>[^<]+<\/lastmod>/.test(sitemapXml);
   if (hasLastmod) {
     score += 10;
-    findings.push({ type: "pass", message: "lastmod dates present" });
+    findings.push({ type: "pass", message: "lastmod values present; accuracy not verified" });
   } else {
     findings.push({
       type: "warning",

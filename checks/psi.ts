@@ -8,7 +8,7 @@
  *
  * Auth: PSI_API_KEY env var is OPTIONAL. Without it you get the public quota
  * (heavily rate-limited). With a key (free from Google Cloud Console / PSI
- * docs) the quota is 25,000 requests/day per project — way more than we'll
+ * docs) the quota is 25,000 requests/day per project ; way more than we'll
  * use. The key lives in Bitwarden Secrets Manager and syncs to Vercel env.
  *
  * Source: https://developers.google.com/speed/docs/insights/v5/get-started
@@ -31,14 +31,14 @@ export interface PsiResult {
   inp?: CwvMetric;
   cls: CwvMetric;
   ttfb?: CwvMetric;
-  /** CrUX field data — only present when the origin has enough real-user samples. */
+  /** CrUX field data ; only present when the origin has enough real-user samples. */
   fieldData?: {
     lcp?: CwvMetric;
     inp?: CwvMetric;
     cls?: CwvMetric;
     ttfb?: CwvMetric;
   };
-  /** Whether the response included field data (real-user) — a quality signal. */
+  /** Whether the response included field data (real-user) ; a quality signal. */
   hasFieldData: boolean;
 }
 
@@ -84,7 +84,7 @@ function extractFieldMetric(
 ): { value: number; category: CwvMetric["category"] } | undefined {
   const m = metrics?.[key];
   if (!m || typeof m.percentile !== "number") return undefined;
-  // PSI returns "FAST" | "AVERAGE" | "SLOW" — normalize.
+  // PSI returns "FAST" | "AVERAGE" | "SLOW" ; normalize.
   const cat = (m.category ?? "").toUpperCase();
   const category: CwvMetric["category"] =
     cat === "FAST" ? "good" : cat === "AVERAGE" ? "needs-improvement" : "poor";

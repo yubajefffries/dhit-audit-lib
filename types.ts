@@ -21,6 +21,8 @@ export interface DimensionResult {
   grade: string;
   findings: Finding[];
   fixable: boolean;
+  /** Page-experience score provenance; absent in legacy saved results. */
+  measurementSource?: "static" | "psi";
   /**
    * When true, this dimension is surfaced for transparency but does NOT
    * contribute to the overall score. Used for things Google explicitly says
@@ -28,7 +30,7 @@ export interface DimensionResult {
    * crawler allow-lists, etc.).
    */
   informational?: boolean;
-  /** Optional quote from Google for informational dimensions. */
+  /** Legacy methodology note for informational dimensions; not a verified quotation. */
   googleQuote?: string;
   /** Optional source URL for informational dimensions. */
   googleSource?: string;

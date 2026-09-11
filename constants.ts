@@ -1,7 +1,7 @@
 /**
  * AI crawlers we recognize in robots.txt.
  *
- * IMPORTANT: this list is INFORMATIONAL only — it is no longer a scoring signal.
+ * IMPORTANT: this list is INFORMATIONAL only ; it is no longer a scoring signal.
  * Per Google's AI Optimization Guide, AI Overviews and AI Mode retrieve from the
  * regular Google Search index. Blocking or allowing third-party crawlers like
  * GPTBot or ClaudeBot is a separate decision (about training data and third-party
@@ -37,10 +37,10 @@ export const AI_CRAWLERS = [
  * Surfaced in the report UI so users (and we) can tell which methodology a
  * historical scan used.
  */
-export const ENGINE_VERSION = "2.4.0-google-microsoft-aligned-psi";
+export const ENGINE_VERSION = "2.5.0-astra-accuracy";
 
 /**
- * Dimension weights — Phase 3, final target (May 2026).
+ * Dimension weights ; Phase 3, final target (May 2026).
  *
  * Rebuilt against Google Search Essentials and the Google AI Optimization Guide.
  * Per Google's own guidance:
@@ -51,27 +51,24 @@ export const ENGINE_VERSION = "2.4.0-google-microsoft-aligned-psi";
  *     indexability, helpful content, semantic HTML, server-rendered main content,
  *     page experience, real internal linking, and original substance.
  *
- * Eleven scored dimensions. Each maps to a citable line in Google Search
- * Essentials or the AI Optimization Guide. Top tier (15%) goes to the two
- * make-or-break categories: helpful content and indexability. Mid tier (10%)
- * covers the per-page technical signals. Lower tiers reflect Google's own
- * "helpful but not required" positioning (schema, sitemap) and supplementary
- * site-architecture checks.
+ * Eleven scored dimensions with project-defined weights and thresholds.
+ * Source links provide background guidance, not official Google or Microsoft
+ * weights, certification, or a measurement of citation probability.
  *
  * Source: https://developers.google.com/search/docs/essentials
  */
 export const DIMENSION_WEIGHTS = {
-  aeo: 0.15,             // Content structure & helpfulness — AI Mandate 1 + Pillar C
-  indexability: 0.15,    // HTTP 200, noindex, canonical hygiene — Pillar A
-  semantic: 0.10,        // Semantic HTML — AI Mandate 2 + Pillar C
-  rendering: 0.10,       // Server-rendered main content — AI Mandate 2
-  pageExperience: 0.10,  // HTTPS + viewport + payload heuristics — Pillar C
-  meta: 0.10,            // Title, description, canonical, OG — Pillar A + C
-  schema: 0.07,          // Structured data — helpful for rich results, not required for AI
+  aeo: 0.15,             // Content structure & helpfulness ; AI Mandate 1 + Pillar C
+  indexability: 0.15,    // HTTP 200, noindex, canonical hygiene ; Pillar A
+  semantic: 0.10,        // Semantic HTML ; AI Mandate 2 + Pillar C
+  rendering: 0.10,       // Server-rendered main content ; AI Mandate 2
+  pageExperience: 0.10,  // HTTPS + viewport + payload heuristics ; Pillar C
+  meta: 0.10,            // Title, description, canonical, OG ; Pillar A + C
+  schema: 0.07,          // Structured data ; helpful for rich results, not required for AI
   robots: 0.08,          // robots.txt presence + sitemap directive + Googlebot access
-  sitemap: 0.05,         // sitemap.xml discoverability — Pillar C
-  internalLinking: 0.05, // Real <a href>, depth from home — Pillar C (NEW Phase 3)
-  helpfulContent: 0.05,  // Thin content / dup titles / E-E-A-T proxy — Pillar B (NEW Phase 3)
+  sitemap: 0.05,         // sitemap.xml discoverability ; Pillar C
+  internalLinking: 0.05, // Real <a href>, depth from home ; Pillar C (NEW Phase 3)
+  helpfulContent: 0.05,  // Thin content / dup titles / E-E-A-T proxy ; Pillar B (NEW Phase 3)
 } as const;
 
 /**
@@ -94,7 +91,7 @@ export const DIMENSION_INFO = [
     id: "aeo",
     name: "Content Structure & Helpfulness",
     description:
-      "Clear paragraphs, scannable headings, lists, and direct answers — how Google's AI evaluates helpfulness",
+      "Patterns in paragraphs, headings, lists, and direct answers; not a measurement of semantic helpfulness",
     weight: 0.15,
     fixable: false,
   },
@@ -102,7 +99,7 @@ export const DIMENSION_INFO = [
     id: "indexability",
     name: "Indexability & Crawl Eligibility",
     description:
-      "HTTP 200, no accidental noindex, clean canonical — Pillar A of Google Search Essentials",
+      "HTTP 200, no accidental noindex, clean canonical ; Pillar A of Google Search Essentials",
     weight: 0.15,
     fixable: true,
   },
@@ -110,7 +107,7 @@ export const DIMENSION_INFO = [
     id: "semantic",
     name: "Semantic HTML",
     description:
-      "Real <h1>, <main>, <nav>, <article> tags — Google emphasizes this for AI and accessibility",
+      "Real <h1>, <main>, <nav>, <article> tags ; Google emphasizes this for AI and accessibility",
     weight: 0.10,
     fixable: false,
   },
@@ -126,7 +123,7 @@ export const DIMENSION_INFO = [
     id: "pageExperience",
     name: "Page Experience",
     description:
-      "HTTPS, mobile viewport, payload size, render-blocking scripts — static proxy for Core Web Vitals",
+      "HTTPS, mobile viewport, payload size, render-blocking scripts ; static HTML checks, not measured Core Web Vitals",
     weight: 0.10,
     fixable: false,
   },
@@ -149,14 +146,14 @@ export const DIMENSION_INFO = [
     id: "schema",
     name: "Schema.org JSON-LD",
     description:
-      "Structured data where the page genuinely fits a schema type. Helpful for rich results — not required for AI Overviews",
+      "Structured data where the page genuinely fits a schema type. Helpful for rich results ; not required for AI Overviews",
     weight: 0.07,
     fixable: true,
   },
   {
     id: "sitemap",
     name: "sitemap.xml",
-    description: "Sitemap exists, covers your pages, and is referenced from robots.txt",
+    description: "Sitemap structure, sampled URL coverage and robots reference; not full protocol validation",
     weight: 0.05,
     fixable: true,
   },
@@ -164,7 +161,7 @@ export const DIMENSION_INFO = [
     id: "internalLinking",
     name: "Internal Linking & Site Architecture",
     description:
-      "Real <a href> internal links, no orphan pages, important pages within 3 clicks of the homepage",
+      "Internal links and reachability within the crawl sample; not a full-site orphan-page check",
     weight: 0.05,
     fixable: true,
   },
@@ -172,22 +169,22 @@ export const DIMENSION_INFO = [
     id: "helpfulContent",
     name: "Helpful Content & Spam Self-Check",
     description:
-      "Substantive content, no thin pages, no duplicate titles, author signals — Pillar B + AI Mandate 1",
+      "Substantive content, no thin pages, no duplicate titles, author signals ; Pillar B + AI Mandate 1",
     weight: 0.05,
     fixable: false,
   },
 ] as const;
 
 /**
- * Informational dimension metadata — surfaced in the report under an
- * "Informational (not scored)" section with Google's quoted position.
+ * Informational dimension metadata ; surfaced in the report under an
+ * "Informational (not scored)" section with methodology notes.
  */
 export const INFORMATIONAL_DIMENSION_INFO = [
   {
     id: "llmsTxt",
     name: "llms.txt",
     description:
-      "Google: \"You don't need to create new machine readable files, AI text files, markup, or Markdown to appear in generative AI search.\" Shown for completeness only.",
+      "Optional machine-readable text files are observed for completeness; their presence is not scored.",
     googleQuote:
       "You don't need to create new machine readable files, AI text files, markup, or Markdown to appear in generative AI search.",
     googleSource:

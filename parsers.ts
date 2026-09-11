@@ -6,6 +6,9 @@ export function parseHTML(html: string, url: string) {
 }
 
 export function extractPageInfo($: cheerio.CheerioAPI, url: string) {
+  const visible = $("body").clone();
+  visible.find("script, style, template, noscript, [hidden], [aria-hidden='true']").remove();
+  const bodyText = visible.text().replace(/\s+/g, " ").trim();
   return {
     title: $("title").first().text().trim(),
     metaDescription: $('meta[name="description"]').attr("content") || "",
@@ -29,8 +32,8 @@ export function extractPageInfo($: cheerio.CheerioAPI, url: string) {
     hasSection: $("section").length > 0,
     imgsWithoutAlt: $("img:not([alt])").length,
     totalImgs: $("img").length,
-    bodyTextLength: $("body").text().replace(/\s+/g, " ").trim().length,
-    bodyText: $("body").text().replace(/\s+/g, " ").trim().substring(0, 5000),
+    bodyTextLength: bodyText.length,
+    bodyText: bodyText.substring(0, 5000),
     hasFaqSection:
       $('[class*="faq"], [id*="faq"], details, [itemtype*="FAQPage"]')
         .length > 0,
@@ -72,11 +75,16 @@ export function extractJsonLd(
       const raw = $(el).html();
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          results.push(...parsed);
-        } else {
-          results.push(parsed);
-        }
+        const visit = (value: unknown, inheritedContext?: unknown) => {
+          if (Array.isArray(value)) { for (const item of value) visit(item, inheritedContext); return; }
+          if (!value || typeof value !== "object") return;
+          const node = value as Record<string, unknown>;
+          const context = node["@context"] ?? inheritedContext;
+          // Graph wrappers are containers; context applies to graph nodes.
+          if (node["@type"] || !node["@graph"]) results.push({ ...node, ...(context ? { "@context": context } : {}) });
+          if (node["@graph"]) visit(node["@graph"], context);
+        };
+        visit(parsed);
       }
     } catch {
       // Invalid JSON-LD: will be flagged in check
