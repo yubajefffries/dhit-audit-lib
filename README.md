@@ -12,7 +12,7 @@ the folder is just sourced from this repo instead of being checked in directly.
 ## What it scores
 
 11 dimensions, weights sum to 1.00. Every dimension maps to a citable line in
-Google's or Microsoft's own published guidance.
+background search guidance. The weights and thresholds are project-defined heuristics, not vendor scoring or citation predictions.
 
 | Dimension | Weight | Source |
 |---|---|---|
@@ -30,7 +30,7 @@ Google's or Microsoft's own published guidance.
 
 Plus 4 **informational** dimensions that don't affect the score:
 
-- AI Surface Coverage — per-AI-product eligibility map (Google AI Overviews, Copilot, ChatGPT search, Perplexity, Brave, DuckDuckGo, You.com)
+- Search Crawler Rules: root-path robots observations only; indexing and AI citations are not measured.
 - IndexNow Adoption — Microsoft protocol detection
 - llms.txt — Google says not required, surfaced for transparency
 - Third-Party AI Crawler Allow-List — not a Google AI signal, surfaced for transparency
@@ -102,3 +102,11 @@ Offline regression tests: with Node 20+ and `tsx`/`cheerio` installed, run `tsx 
 
 - Lite now preserves unique per-page findings with page references in each dimension's findings list, while still omitting page grouping/scores and all deep-only work. Existing aggregate summaries may still omit explanations for some deductions.
 - AI surface coverage now reports only two limited crawler-rule observations, with unavailable robots data marked unknown. It no longer infers product visibility, citation eligibility, or unsupported index partnerships. No score weights changed.
+
+## 2.5.0 accuracy changes
+
+Robots checks share one parser for adjacent user-agent groups, repeated groups, specific-agent precedence, comments, empty directives, wildcard/end anchors and longest matching path rules with Allow winning ties. The scored check inspects sampled paths; informational checks explicitly describe the root path. This is a common-case parser, not a claim of complete REP compliance or actual crawler access.
+
+Visible-source text excludes script, style, template, noscript and explicitly hidden elements. CSS visibility and the rendered DOM are not evaluated. Rendering credit is independent of framework markers. JSON-LD graph nodes inherit context; recognized types and URL-based suggestions do not validate rich-result eligibility. Sitemap extraction uses XML-mode structure and exact normalized URL coverage; well-formedness and protocol validation remain outside scope, and child sitemaps are not fetched.
+
+Page-experience dimensions persist `measurementSource`: `static` or `psi`. PSI changes only the aggregate dimension; per-page scores remain static. Email findings are DNS observations, not evidence of message authentication or receiver enforcement. Perfect dimensions no longer appear in improvement priorities.

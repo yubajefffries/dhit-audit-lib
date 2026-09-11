@@ -36,7 +36,7 @@ export function checkRendering(pages: PageData[]): DimensionResult {
         message: `Very little text in HTML source (${info.bodyTextLength} chars)`,
         page: page.path,
         detail:
-          "Content may be rendered by JavaScript and invisible to AI crawlers",
+          "Little source text was observed. The rendered DOM was not measured; check whether meaningful content depends on JavaScript.",
       };
       findings.push(f);
       pageFindings.push(f);
@@ -55,32 +55,16 @@ export function checkRendering(pages: PageData[]): DimensionResult {
       pageScore = Math.min(pageScore, 20);
     }
 
-    // __NEXT_DATA__ is the Pages Router marker; the App Router (Next 13+)
-    // streams RSC payloads via self.__next_f instead. Both are pre-rendered.
-    const hasSSR = /data-reactroot|__NEXT_DATA__|__next_f|__NUXT|astro/i.test(
-      page.html,
-    );
-    if (hasSSR) {
-      pageScore += 30;
+    // Framework markers do not prove rendering. Ordinary static HTML receives
+    // the same credit for meaningful source content, without needing noscript.
+    if (info.bodyTextLength > 100 && info.headings.length > 0) {
+      pageScore += 40;
       const f: Finding = {
-        type: "pass",
-        message: "SSR/SSG framework detected (content pre-rendered)",
+        type: "pass", message: "Text and headings are present in the HTML source",
+        detail: "Static source inspection only. CSS visibility and the JavaScript-rendered DOM were not compared.",
         page: page.path,
       };
-      findings.push(f);
-      pageFindings.push(f);
-    }
-
-    const hasNoscript = /<noscript>[\s\S]{20,}<\/noscript>/i.test(page.html);
-    if (hasNoscript) {
-      pageScore += 10;
-      const f: Finding = {
-        type: "pass",
-        message: "Noscript fallback content present",
-        page: page.path,
-      };
-      findings.push(f);
-      pageFindings.push(f);
+      findings.push(f); pageFindings.push(f);
     }
 
     if (info.headings.length > 0) {

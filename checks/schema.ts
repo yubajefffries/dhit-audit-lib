@@ -18,7 +18,7 @@ function guessPageType(url: string): string {
   if (path === "/" || path === "") return "home";
   if (/about/i.test(path)) return "about";
   // Nonprofits and agencies commonly publish their offerings under
-  // /programs/ rather than /services/ — same page type, same expectations.
+  // /programs/ rather than /services/ ; same page type, same expectations.
   if (/service|program/i.test(path)) return "services";
   if (/product/i.test(path)) return "products";
   if (/blog\/?$/i.test(path)) return "blog";
@@ -32,7 +32,7 @@ function getSchemaTypes(jsonLd: Array<Record<string, unknown>>): string[] {
   return jsonLd
     .map((item) => {
       const type = item["@type"];
-      if (Array.isArray(type)) return type as string[];
+      if (Array.isArray(type)) return type.filter((value): value is string => typeof value === "string");
       if (typeof type === "string") return [type];
       return [];
     })
@@ -40,7 +40,7 @@ function getSchemaTypes(jsonLd: Array<Record<string, unknown>>): string[] {
 }
 
 export function checkSchema(pages: PageData[]): DimensionResult {
-  const findings: Finding[] = [];
+  const findings: Finding[] = [{ type: "info", message: "JSON-LD syntax and type observations only", detail: "This is not Schema.org validation or Google rich-result validation. URL-based type suggestions may not fit the actual page." }];
   const perPage: PerPageScore[] = [];
   let totalScore = 0;
   let pagesWithSchema = 0;
@@ -52,7 +52,7 @@ export function checkSchema(pages: PageData[]): DimensionResult {
     const pageType = guessPageType(page.url);
 
     if (jsonLd.length === 0) {
-      const f: Finding = { type: "fail", message: "No JSON-LD found", page: page.path };
+      const f: Finding = { type: "fail", message: "No parseable JSON-LD objects found", page: page.path };
       findings.push(f);
       pageFindings.push(f);
       perPage.push({ url: page.url, path: page.path, title: page.title, score: 0, findings: pageFindings });
@@ -82,7 +82,7 @@ export function checkSchema(pages: PageData[]): DimensionResult {
         pageScore += 20;
         const f: Finding = {
           type: "pass",
-          message: `Has expected schema types: ${types.join(", ")}`,
+          message: `Recognized schema types for the URL-based page guess: ${types.join(", ")}`,
           page: page.path,
         };
         findings.push(f);
@@ -90,7 +90,7 @@ export function checkSchema(pages: PageData[]): DimensionResult {
       } else {
         const f: Finding = {
           type: "warning",
-          message: `Expected ${expected.join(" or ")} but found: ${types.join(", ") || "none"}`,
+          message: `URL-based heuristic suggests ${expected.join(" or ")}; found: ${types.join(", ") || "none"}`,
           page: page.path,
         };
         findings.push(f);

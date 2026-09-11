@@ -1,7 +1,7 @@
 import type { DimensionResult, Finding } from "../types";
 
 /**
- * llms.txt detection — INFORMATIONAL ONLY (does not affect the score).
+ * llms.txt detection ; INFORMATIONAL ONLY (does not affect the score).
  *
  * Per Google's AI Optimization Guide (https://developers.google.com/search/docs/fundamentals/ai-optimization-guide):
  *   "You don't need to create new machine readable files, AI text files,
@@ -40,7 +40,7 @@ export function checkLlmsTxt(
       type: "info",
       message: "Not present: no llms.txt at the site root.",
       detail:
-        "This is not a problem. Google's AI surfaces retrieve from the regular Search index — no special files are required.",
+        "This is not a problem. Google's AI surfaces retrieve from the regular Search index ; no special files are required.",
     });
   }
 
@@ -49,7 +49,7 @@ export function checkLlmsTxt(
     name: "llms.txt (Informational)",
     weight: 0,
     score: 0,
-    grade: "—",
+    grade: "Not scored",
     findings,
     fixable: false,
     informational: true,

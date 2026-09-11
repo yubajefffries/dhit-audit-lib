@@ -4,29 +4,29 @@ import { gradeFromScore } from "../constants";
 import type { PsiResult, CwvMetric } from "./psi";
 
 /**
- * Page Experience — Pillar C of Google Search Essentials + AI Mandate 2.
+ * Page Experience ; Pillar C of Google Search Essentials + AI Mandate 2.
  *
  * Per Google: page experience (responsive, fast, low CLS) is part of the
  * helpful-content signals their AI surfaces use to weigh source quality.
  *
  * Two scoring modes:
  *
- *   1. `checkPageExperience(pages)` — STATIC heuristic, always available.
+ *   1. `checkPageExperience(pages)` ; STATIC heuristic, always available.
  *      Approximates page experience from the HTML response:
- *        - HTTPS — required
- *        - <meta name="viewport"> — required for mobile
+ *        - HTTPS ; required
+ *        - <meta name="viewport"> ; required for mobile
  *        - HTML payload size
  *        - Render-blocking <script> tags in <head>
  *        - Inline <style> bytes
  *
- *   2. `applyPsiToPageExperience(dimension, psi)` — when PageSpeed Insights
+ *   2. `applyPsiToPageExperience(dimension, psi)` ; when PageSpeed Insights
  *      returned real Core Web Vitals (LCP, INP, CLS) for the audited origin,
  *      this replaces the static score with one derived from PSI's Lighthouse
  *      performance score, and folds in CrUX field data if available.
  *
  * Deep audits run PSI in parallel with the crawl, so when the audit finishes
  * the user sees real CWV. Lite audits and audits without a PSI key fall back
- * to the static heuristic — graceful degradation either way.
+ * to the static heuristic ; graceful degradation either way.
  *
  * Source: https://developers.google.com/search/docs/appearance/core-web-vitals
  * Source: https://developers.google.com/search/docs/appearance/page-experience
@@ -53,7 +53,7 @@ export function checkPageExperience(pages: PageData[]): DimensionResult {
     try {
       isHttps = new URL(page.url).protocol === "https:";
     } catch {
-      // unparseable URL — treat as failure
+      // unparseable URL ; treat as failure
     }
     if (!isHttps) {
       pageScore -= 30;
@@ -110,7 +110,7 @@ export function checkPageExperience(pages: PageData[]): DimensionResult {
         page: page.url,
       });
     } else if (htmlBytes > HTML_SIZE_OK) {
-      // No penalty, no warning — just info
+      // No penalty, no warning ; just info
       pageFindings.push({
         type: "info",
         message: `HTML payload ${(htmlBytes / 1024).toFixed(0)} KB`,
@@ -189,6 +189,7 @@ export function checkPageExperience(pages: PageData[]): DimensionResult {
 
   return {
     id: "pageExperience",
+    measurementSource: "static",
     name: "Page Experience",
     weight: 0.1,
     score,
@@ -200,7 +201,7 @@ export function checkPageExperience(pages: PageData[]): DimensionResult {
 }
 
 // ---------------------------------------------------------------------------
-// PSI merge — replaces the static heuristic with real Core Web Vitals when
+// PSI merge ; replaces the static heuristic with real Core Web Vitals when
 // PageSpeed Insights returned data for the audited origin.
 // ---------------------------------------------------------------------------
 
@@ -230,10 +231,10 @@ function metricFinding(
 
 /**
  * Merges PSI results into a pageExperience DimensionResult. Returns a NEW
- * DimensionResult — does not mutate the input.
+ * DimensionResult ; does not mutate the input.
  *
  * - The dimension `score` becomes the Lighthouse performance score (0-100),
- *   which is the score Google itself uses for the same signals.
+ *   a lab performance metric, not a search ranking or citation score.
  * - Per-page scores are left intact (static heuristic still applies to each
  *   crawled page).
  * - Findings are augmented with LCP / INP / CLS / TTFB rows, labelled as
@@ -251,10 +252,10 @@ export function applyPsiToPageExperience(
 
   newFindings.push({
     type: "info",
-    message: `PageSpeed Insights (${psi.strategy}) — Lighthouse performance score: ${psi.performanceScore}/100`,
+    message: `PageSpeed Insights (${psi.strategy}) ; Lighthouse performance score: ${psi.performanceScore}/100`,
     detail: psi.hasFieldData
       ? "Includes CrUX field data from real users on this origin."
-      : "Lab data only — origin doesn't have enough real-user samples for CrUX field data yet.",
+      : "Lab data only ; origin doesn't have enough real-user samples for CrUX field data yet.",
   });
 
   // Lab metrics
@@ -280,7 +281,7 @@ export function applyPsiToPageExperience(
     );
   }
 
-  // Field metrics (CrUX real-user data) — only when present
+  // Field metrics (CrUX real-user data) ; only when present
   if (psi.fieldData) {
     newFindings.push({
       type: "info",
@@ -315,7 +316,7 @@ export function applyPsiToPageExperience(
     message: "Static signals (also applied to per-page scores):",
   });
   for (const f of dimension.findings) {
-    // Drop the placeholder line that hinted PSI would arrive — it just did.
+    // Drop the placeholder line that hinted PSI would arrive ; it just did.
     if (
       f.type === "info" &&
       f.message.startsWith("Static heuristic. If PageSpeed Insights")
@@ -327,6 +328,7 @@ export function applyPsiToPageExperience(
 
   return {
     ...dimension,
+    measurementSource: "psi",
     score: psi.performanceScore,
     grade: gradeFromScore(psi.performanceScore),
     findings: newFindings,

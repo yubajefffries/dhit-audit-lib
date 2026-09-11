@@ -32,7 +32,7 @@ import { checkEmailSecurity } from "./checks/email-security";
 
 function generatePriorities(dimensions: DimensionResult[]): string[] {
   return dimensions
-    .filter((d) => !d.informational)
+    .filter((d) => !d.informational && d.score < 100)
     .map((d) => ({
       id: d.id,
       name: d.name,
@@ -61,7 +61,7 @@ function runAllChecks(crawl: CrawlResult): DimensionResult[] {
     checkRendering(crawl.pages),
     checkPageExperience(crawl.pages),
     checkMetaTags(crawl.pages),
-    checkRobots(crawl.robotsTxt),
+    checkRobots(crawl.robotsTxt, crawl.pages.map((p) => new URL(p.url).pathname + new URL(p.url).search)),
     checkSchema(crawl.pages),
     checkSitemap(crawl.sitemapXml, crawl.robotsTxt, crawl.pages),
     checkInternalLinking(crawl.pages, crawl.baseUrl),

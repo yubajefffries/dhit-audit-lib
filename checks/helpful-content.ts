@@ -3,7 +3,7 @@ import { parseHTML } from "../parsers";
 import { gradeFromScore } from "../constants";
 
 /**
- * Helpful Content & Spam Self-Check — Pillar B (Spam Policies) + AI Mandate 1
+ * Helpful Content & Spam Self-Check ; Pillar B (Spam Policies) + AI Mandate 1
  * (Valuable, non-commodity content) of the Google AI Optimization Guide.
  *
  * This is the "would anyone miss this page if it disappeared?" check. Google
@@ -116,7 +116,7 @@ export function checkHelpfulContent(pages: PageData[]): DimensionResult {
         type: "info",
         message: "No author / byline signal detected",
         detail:
-          "Google's helpful-content guidance emphasizes E-E-A-T — knowing who wrote it. Add an author byline or meta[name=\"author\"] on content pages.",
+          "Google's helpful-content guidance emphasizes E-E-A-T ; knowing who wrote it. Add an author byline or meta[name=\"author\"] on content pages.",
         page: page.url,
       });
     }
@@ -140,7 +140,7 @@ export function checkHelpfulContent(pages: PageData[]): DimensionResult {
       pageFindings.push({
         type: "fail",
         message: "Title is identical to another page on this site",
-        detail: `"${page.title}" — duplicate titles confuse Googlebot about which URL to rank and can trigger scaled-content flags. Rewrite each title to be page-specific.`,
+        detail: `"${page.title}" ; duplicate titles confuse Googlebot about which URL to rank and can trigger scaled-content flags. Rewrite each title to be page-specific.`,
         page: page.url,
       });
     }

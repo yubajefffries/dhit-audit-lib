@@ -3,7 +3,7 @@ import { parseHTML } from "../parsers";
 import { gradeFromScore } from "../constants";
 
 /**
- * Indexability — Pillar A of Google Search Essentials.
+ * Indexability ; Pillar A of Google Search Essentials.
  *
  * Per Google: "If a page can't be indexed by Google Search, it cannot be cited
  * by Google AI." AI Overviews and AI Mode retrieve from the regular Google

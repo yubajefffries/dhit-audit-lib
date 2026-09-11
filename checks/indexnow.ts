@@ -1,7 +1,7 @@
 import type { DimensionResult, Finding, PageData } from "../types";
 
 /**
- * IndexNow Adoption — INFORMATIONAL ONLY (does not affect the score).
+ * IndexNow Adoption ; INFORMATIONAL ONLY (does not affect the score).
  *
  * IndexNow is Microsoft's open protocol for pushing URL changes to search
  * engines instantly. Currently adopted by Bing, Yandex, Naver, and Seznam.
@@ -87,7 +87,7 @@ export function checkIndexNow(
     name: "IndexNow Adoption (Informational)",
     weight: 0,
     score: 0,
-    grade: "—",
+    grade: "Not scored",
     findings,
     fixable: true,
     informational: true,

@@ -3,7 +3,7 @@ import { parseHTML } from "../parsers";
 import { gradeFromScore } from "../constants";
 
 /**
- * Internal Linking & Site Architecture — Pillar C of Google Search Essentials.
+ * Internal Linking & Site Architecture ; Pillar C of Google Search Essentials.
  *
  * Per Google: "Make sure that other pages on the web link to your site" and
  * "Make your links crawlable". Internal linking is how Googlebot (and AI
