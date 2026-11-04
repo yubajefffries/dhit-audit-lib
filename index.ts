@@ -1,5 +1,5 @@
 /**
- * dhit-audit-lib — shared AI-search audit engine.
+ * dhit-audit-lib: shared AI-search audit engine.
  *
  * Consumed by:
  *   - llmsearch-yourupdatedpage (the paid deep-audit product at llmsearch.yourupdatedpage.xyz)
@@ -11,10 +11,10 @@
  * Engine version: see ENGINE_VERSION in constants.ts.
  *
  * Sources every dimension maps to:
- *   - Google Search Essentials — https://developers.google.com/search/docs/essentials
- *   - Google AI Optimization Guide — https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
- *   - Bing Webmaster Guidelines — https://www.bing.com/webmasters/help/webmaster-guidelines-30fba23a
- *   - Microsoft AI Performance Dashboard — https://about.ads.microsoft.com/en/blog/post/march-2026/the-ai-performance-dashboard-your-view-into-where-your-brand-appears-across-the-ai-web
+ *   - Google Search Essentials: https://developers.google.com/search/docs/essentials
+ *   - Google AI Optimization Guide: https://developers.google.com/search/docs/fundamentals/ai-optimization-guide
+ *   - Bing Webmaster Guidelines: https://www.bing.com/webmasters/help/webmaster-guidelines-30fba23a
+ *   - Microsoft AI Performance Dashboard: https://about.ads.microsoft.com/en/blog/post/march-2026/the-ai-performance-dashboard-your-view-into-where-your-brand-appears-across-the-ai-web
  */
 
 export {

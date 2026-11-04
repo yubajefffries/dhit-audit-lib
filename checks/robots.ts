@@ -78,9 +78,9 @@ function isCrawlerBlocked(
 }
 
 /**
- * checkRobots — SCORED.
+ * checkRobots: SCORED.
  *
- * Per Google Search Essentials (Pillar A), the requirement is crawlability —
+ * Per Google Search Essentials (Pillar A), the requirement is crawlability:
  * Googlebot must be able to reach indexable pages, and the sitemap should be
  * discoverable. We score on:
  *   - File presence
@@ -102,7 +102,7 @@ export function checkRobots(robotsTxt: string | null): DimensionResult {
         "A robots.txt file is optional, but recommended. Add one at /robots.txt that references your sitemap and allows Googlebot.",
     });
     // A missing robots.txt means crawlers default to allowed, so this isn't
-    // a hard failure — just below ideal. Score 50.
+    // a hard failure, just below ideal. Score 50.
     return {
       id: "robots",
       name: "robots.txt",
@@ -134,7 +134,7 @@ export function checkRobots(robotsTxt: string | null): DimensionResult {
   const googlebotBlocked = isCrawlerBlocked(rules, "Googlebot");
   const bingbotBlocked = isCrawlerBlocked(rules, "Bingbot");
 
-  // Googlebot — gateway to Google Search, AI Overviews, AI Mode, Gemini grounded results
+  // Googlebot, gateway to Google Search, AI Overviews, AI Mode, Gemini grounded results
   if (googlebotBlocked) {
     findings.push({
       type: "fail",
@@ -151,7 +151,7 @@ export function checkRobots(robotsTxt: string | null): DimensionResult {
     });
   }
 
-  // Bingbot — gateway to Bing, Microsoft Copilot, ChatGPT search, Perplexity, Brave, DuckDuckGo, You.com
+  // Bingbot, gateway to Bing, Microsoft Copilot, ChatGPT search, Perplexity, Brave, DuckDuckGo, You.com
   if (bingbotBlocked) {
     findings.push({
       type: "fail",
@@ -182,13 +182,13 @@ export function checkRobots(robotsTxt: string | null): DimensionResult {
 }
 
 /**
- * checkAiCrawlers — INFORMATIONAL ONLY (does not affect the score).
+ * checkAiCrawlers: INFORMATIONAL ONLY (does not affect the score).
  *
  * Surfaces whether the site explicitly allows or blocks third-party AI
  * crawlers (GPTBot, ClaudeBot, PerplexityBot, etc.).
  *
  * This is NOT a Google AI search signal. Google's AI Overviews and AI Mode
- * use the regular Google index — Googlebot's access is what matters for
+ * use the regular Google index, Googlebot's access is what matters for
  * Google AI citation eligibility. The third-party crawler allow-list is
  * about training-data access for OpenAI / Anthropic / Perplexity / etc.
  *
@@ -203,20 +203,20 @@ export function checkAiCrawlers(robotsTxt: string | null): DimensionResult {
     message:
       "Third-party AI crawler access is not a Google AI search signal.",
     detail:
-      "Google's AI Overviews and AI Mode use the regular Google Search index — Googlebot's access is what matters for Google AI citation eligibility. The bots below (GPTBot, ClaudeBot, etc.) affect whether third-party AI products can use your content for training or in their own answers. This check is informational and does not affect your score.",
+      "Google's AI Overviews and AI Mode use the regular Google Search index, Googlebot's access is what matters for Google AI citation eligibility. The bots below (GPTBot, ClaudeBot, etc.) affect whether third-party AI products can use your content for training or in their own answers. This check is informational and does not affect your score.",
   });
 
   if (!robotsTxt) {
     findings.push({
       type: "info",
-      message: "No robots.txt — third-party AI crawlers default to allowed.",
+      message: "No robots.txt, third-party AI crawlers default to allowed.",
     });
     return {
       id: "aiCrawlers",
       name: "Third-Party AI Crawler Allow-List (Informational)",
       weight: 0,
       score: 0,
-      grade: "—",
+      grade: "N/A",
       findings,
       fixable: false,
       informational: true,
@@ -275,7 +275,7 @@ export function checkAiCrawlers(robotsTxt: string | null): DimensionResult {
     name: "Third-Party AI Crawler Allow-List (Informational)",
     weight: 0,
     score: 0,
-    grade: "—",
+    grade: "N/A",
     findings,
     fixable: false,
     informational: true,
