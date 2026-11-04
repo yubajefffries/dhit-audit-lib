@@ -94,10 +94,10 @@ export interface AuditResult {
   pagesAudited: number;
   overallScore: number;
   grade: string;
-  /** Scored dimensions — contribute to overallScore. */
+  /** Scored dimensions, contribute to overallScore. */
   dimensions: DimensionResult[];
   /**
-   * Informational dimensions — surfaced in the report but do not contribute
+   * Informational dimensions, surfaced in the report but do not contribute
    * to the score. Things Google says are not required for AI search.
    */
   informational?: DimensionResult[];

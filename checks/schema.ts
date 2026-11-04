@@ -18,7 +18,7 @@ function guessPageType(url: string): string {
   if (path === "/" || path === "") return "home";
   if (/about/i.test(path)) return "about";
   // Nonprofits and agencies commonly publish their offerings under
-  // /programs/ rather than /services/ — same page type, same expectations.
+  // /programs/ rather than /services/, same page type, same expectations.
   if (/service|program/i.test(path)) return "services";
   if (/product/i.test(path)) return "products";
   if (/blog\/?$/i.test(path)) return "blog";

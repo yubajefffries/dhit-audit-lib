@@ -2,11 +2,11 @@
 
 Shared AI-search audit engine for DarkHorse IT properties. Consumed by:
 
-- **llmsearch-yourupdatedpage** — paid deep-audit product at `llmsearch.yourupdatedpage.xyz`
-- **yourupdatedpage** — free lite scanner at `yourupdatedpage.xyz/tools/llm-check`
+- **llmsearch-yourupdatedpage**: paid deep-audit product at `llmsearch.yourupdatedpage.xyz`
+- **yourupdatedpage**: free lite scanner at `yourupdatedpage.xyz/tools/llm-check`
 
 Both consumers add this repo as a **git submodule** at `src/lib/audit/`. Existing imports
-like `@/lib/audit/scorer` continue to work because the path resolution doesn't change —
+like `@/lib/audit/scorer` continue to work because the path resolution doesn't change:
 the folder is just sourced from this repo instead of being checked in directly.
 
 ## What it scores
@@ -23,17 +23,17 @@ Google's or Microsoft's own published guidance.
 | Page Experience | 10% | Google CWV / Bing Webmaster Guidelines |
 | Meta & Canonical | 10% | Google Pillar A + C |
 | robots.txt | 8% | Google + Bing Webmaster Guidelines |
-| Schema.org JSON-LD | 7% | helpful for rich results — **not required** for AI |
+| Schema.org JSON-LD | 7% | helpful for rich results, **not required** for AI |
 | sitemap.xml | 5% | Google + Bing |
 | Internal Linking & Site Architecture | 5% | Google Pillar C |
 | Helpful Content & Spam Self-Check | 5% | Google Pillar B + AI Mandate 1 |
 
 Plus 4 **informational** dimensions that don't affect the score:
 
-- AI Surface Coverage — per-AI-product eligibility map (Google AI Overviews, Copilot, ChatGPT search, Perplexity, Brave, DuckDuckGo, You.com)
-- IndexNow Adoption — Microsoft protocol detection
-- llms.txt — Google says not required, surfaced for transparency
-- Third-Party AI Crawler Allow-List — not a Google AI signal, surfaced for transparency
+- AI Surface Coverage: per-AI-product eligibility map (Google AI Overviews, Copilot, ChatGPT search, Perplexity, Brave, DuckDuckGo, You.com)
+- IndexNow Adoption: Microsoft protocol detection
+- llms.txt: Google says not required, surfaced for transparency
+- Third-Party AI Crawler Allow-List: not a Google AI signal, surfaced for transparency
 
 ## Engine versions
 
@@ -50,11 +50,11 @@ Plus 4 **informational** dimensions that don't affect the score:
 ```ts
 import { runLiteAudit, runDeepAudit, crawlSite } from "@/lib/audit";
 
-// Free lite scanner — fast, no PSI, no email security DNS.
+// Free lite scanner: fast, no PSI, no email security DNS.
 const crawl = await crawlSite("https://example.com");
 const result = runLiteAudit(crawl); // returns AuditResult
 
-// Paid deep audit — adds PSI Core Web Vitals + email security.
+// Paid deep audit: adds PSI Core Web Vitals + email security.
 // Requires PSI_API_KEY env var for real CWV; falls back to static heuristic otherwise.
 const deep = await runDeepAudit(crawl);
 ```

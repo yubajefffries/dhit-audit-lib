@@ -90,7 +90,7 @@ function computeOverallScore(dimensions: DimensionResult[]): number {
  * Site-level dimensions contribute their aggregate score to every page
  * equally, which is correct: a broken robots.txt hurts every page.
  *
- * Informational dimensions are skipped — they don't contribute to per-page
+ * Informational dimensions are skipped, they don't contribute to per-page
  * scores either.
  */
 function composePageScores(

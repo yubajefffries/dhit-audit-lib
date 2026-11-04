@@ -105,7 +105,7 @@ export function extractInternalLinks(
         }
         resolved.pathname = path;
         // Root links resolve to "origin/" while the crawl seed is stored
-        // without the trailing slash — normalize so the homepage is not
+        // without the trailing slash, normalize so the homepage is not
         // crawled (and scored) twice under two spellings of the same URL.
         links.add(
           resolved.pathname === "/" && !resolved.search
